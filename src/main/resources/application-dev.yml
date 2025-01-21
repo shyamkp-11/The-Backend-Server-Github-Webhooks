@@ -14,3 +14,10 @@ spring:
         properties:
             hibernate:
                 format-sql: true
+            javax:
+                persistence:
+                    schema-generation:
+                        create-source: metadata
+                        scripts:
+                            action: create
+                            create-target: create.sql

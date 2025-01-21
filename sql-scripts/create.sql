@@ -1,0 +1,13 @@
+create table _user (id integer not null, email varchar(255), firstname varchar(255), lastname varchar(255), password varchar(255), role enum ('ADMIN','MANAGER','USER'), primary key (id)) engine=InnoDB;
+create table _user_seq (next_val bigint) engine=InnoDB;
+insert into _user_seq values ( 1 );
+create table github_users (created_by integer not null, updated_by integer, created_at datetime(6) not null, updated_at datetime(6), first_name varchar(45), last_name varchar(45), email varchar(64), global_id varchar(255) not null, username varchar(255), primary key (global_id)) engine=InnoDB;
+create table github_users_fcm (created_by integer not null, enabled bit not null, message_deliver_failure_count integer not null, sign_out bit not null, created_at datetime(6) not null, enabled_updated_at datetime(6), id bigint not null auto_increment, signed_out_at datetime(6), device_id varchar(128) not null, fcm_token varchar(256) not null, github_user_id varchar(255), primary key (id)) engine=InnoDB;
+create table token (expired bit not null, id integer not null, revoked bit not null, user_id integer, token varchar(255), token_type enum ('BEARER'), primary key (id)) engine=InnoDB;
+create table token_seq (next_val bigint) engine=InnoDB;
+insert into token_seq values ( 1 );
+alter table _user add constraint UKk11y3pdtsrjgy8w9b6q4bjwrx unique (email);
+alter table github_users_fcm add constraint UK9nb9fftba00ek4ia2wvbovj84 unique (device_id, github_user_id);
+alter table token add constraint UKpddrhgwxnms2aceeku9s2ewy5 unique (token);
+alter table github_users_fcm add constraint FKcu0wwk2dluqeolb78k7kimmg2 foreign key (github_user_id) references github_users (global_id);
+alter table token add constraint FKiblu4cjwvyntq3ugo31klp1c6 foreign key (user_id) references _user (id);
