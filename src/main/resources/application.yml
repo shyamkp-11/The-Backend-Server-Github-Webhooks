@@ -1,0 +1,28 @@
+management:
+    endpoints:
+        web:
+            exposure:
+                include: '*'
+    info:
+        env:
+            enabled: true
+spring:
+    application:
+        name: GithubPlayroom
+    data:
+        rest:
+            basePath: /api/v1/data
+            default-page-size: 20
+    jpa:
+        database-platform: org.hibernate.dialect.MySQL8Dialect
+application:
+    security:
+        jwt:
+            secret-key: ${SECRET_KEY}
+            expiration: 86400000 # a day
+            refresh-token:
+                expiration: 604800000 # 7 days
+    startup:
+        credentials:
+            admin_username: ${ADMIN_USERNAME}
+            admin_password: ${ADMIN_PASSWORD}
