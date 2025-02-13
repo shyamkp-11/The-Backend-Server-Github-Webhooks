@@ -26,3 +26,7 @@ application:
         credentials:
             admin_username: ${ADMIN_USERNAME}
             admin_password: ${ADMIN_PASSWORD}
+    github:
+        hmac_key: ${APPLICATION_GITHUB_HMAC}
+        token: ${APPLICATION_GITHUB_TOKEN}
+        base_url: https://api.github.com

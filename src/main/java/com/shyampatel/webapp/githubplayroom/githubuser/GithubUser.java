@@ -1,14 +1,12 @@
 package com.shyampatel.webapp.githubplayroom.githubuser;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import com.shyampatel.webapp.githubplayroom.entity.BaseEntity;
 import com.shyampatel.webapp.githubplayroom.githubuserfcm.GithubUserFcm;
 import jakarta.persistence.*;
-import lombok.Builder;
 
 import java.util.List;
 
-@Builder
 @Entity
 @Table(name="github_users")
 public class GithubUser extends BaseEntity {
@@ -35,6 +33,10 @@ public class GithubUser extends BaseEntity {
     // define constructors
     public GithubUser() {
 
+    }
+
+    public static GithubUser.Builder builder() {
+        return new GithubUser.Builder();
     }
 
     public List<GithubUserFcm> getGithubUserFcmS() {
@@ -106,6 +108,50 @@ public class GithubUser extends BaseEntity {
                 ", globalIf='" + globalId + '\'' +
                 '}';
     }
+
+    public static class Builder {
+        private String globalId;
+        private String username;
+        private String firstName;
+        private String lastName;
+        private String email;
+        private List<GithubUserFcm> githubUserFcmS;
+
+        public Builder setGlobalId(String globalId) {
+            this.globalId = globalId;
+            return this;
+        }
+
+        public Builder setUsername(String username) {
+            this.username = username;
+            return this;
+        }
+
+        public Builder setFirstName(String firstName) {
+            this.firstName = firstName;
+            return this;
+        }
+
+        public Builder setLastName(String lastName) {
+            this.lastName = lastName;
+            return this;
+        }
+
+        public Builder setEmail(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder setGithubUserFcmS(List<GithubUserFcm> githubUserFcmS) {
+            this.githubUserFcmS = githubUserFcmS;
+            return this;
+        }
+
+        public GithubUser build() {
+            return new GithubUser(globalId, username, firstName, lastName, email, githubUserFcmS);
+        }
+    }
+
 }
 
 

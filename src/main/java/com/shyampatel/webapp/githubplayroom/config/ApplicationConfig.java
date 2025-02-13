@@ -4,6 +4,7 @@ package com.shyampatel.webapp.githubplayroom.config;
 import com.shyampatel.webapp.githubplayroom.audit.*;
 import com.shyampatel.webapp.githubplayroom.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.AuditorAware;
@@ -18,11 +19,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
-@RequiredArgsConstructor
 public class ApplicationConfig {
 
     private final UserRepository repository;
-    private final GithubServerProperties githubServerProperties;
+    @Value("${application.github.base_url}")
+    private String github_base_url;
+
+    public ApplicationConfig(UserRepository repository) {
+        this.repository = repository;
+    }
 
     @Bean
     public AuditorAware<Integer> auditorAware() {
@@ -55,6 +60,6 @@ public class ApplicationConfig {
 
     @Bean
     public WebClient localApiClient() {
-        return WebClient.create(githubServerProperties.getBase_url());
+        return WebClient.create(github_base_url);
     }
 }

@@ -1,0 +1,34 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:test
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create
+#    show-sql: true
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
+      orm:
+        jdbc:
+          bind: TRACE
+application:
+  security:
+    jwt:
+      secret-key: 2b56a93b196bfd12d5740d42b5eb75033df51d02f46a665fe6c6245127f68a798ff45a1e0bc5dde98e8fb5b354813cfad6f8f1d7981b882f9b66ca2ae0af80d9
+      expiration: 86400000 # a day
+      refresh-token:
+        expiration: 604800000 # 7 days
+  startup:
+    credentials:
+      admin_username: admin.test.username
+      admin_password: admin.test.password
+  github:
+    hmac_key: key
+    token: token
+    base_url: https://api.github.com
+debug: true

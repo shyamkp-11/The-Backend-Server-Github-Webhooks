@@ -1,6 +1,7 @@
 package com.shyampatel.webapp.githubplayroom.config;
 
-import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.units.qual.A;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,22 +24,30 @@ import static org.springframework.http.HttpMethod.*;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @EnableWebSecurity
-@RequiredArgsConstructor
 @EnableMethodSecurity
 @Configuration
 public class GithubPlayroomSecurityConfig {
 
-    private static final String[] WHITE_LIST_URL = {
-            "/api/v1/githubUsers/githubWebhookDelivery",
-            "/configuration/ui",
-            "/configuration/security",
-            "/webjars/**",};
+    private final String[] WHITE_LIST_URL;
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private final LogoutHandler logoutHandler;
 
     @Value("${spring.data.rest.basePath}")
     private String dataRestUrl;
+
+    @Autowired
+    public GithubPlayroomSecurityConfig( JwtAuthenticationFilter jwtAuthFilter, AuthenticationProvider authenticationProvider, LogoutHandler logoutHandler) {
+        this.WHITE_LIST_URL = new String[]{
+                "/api/v1/auth/authenticate",
+                "/api/v1/githubUsers/githubWebhookDelivery",
+                "/configuration/ui",
+                "/configuration/security",
+                "/webjars/**",};
+        this.jwtAuthFilter = jwtAuthFilter;
+        this.authenticationProvider = authenticationProvider;
+        this.logoutHandler = logoutHandler;
+    }
 
     @Bean
     public UserDetailsManager userDetailsManager(DataSource dataSource) {

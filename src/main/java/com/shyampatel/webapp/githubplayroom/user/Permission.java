@@ -1,9 +1,6 @@
 package com.shyampatel.webapp.githubplayroom.user;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
 public enum Permission {
 
     ADMIN_READ("admin:read"),
@@ -16,6 +13,14 @@ public enum Permission {
     MANAGER_DELETE("management:delete"),
     ;
 
-    @Getter
+
     private final String permission;
+
+    public String getPermission() {
+        return permission;
+    }
+
+    Permission(String permission) {
+        this.permission = permission;
+    }
 }

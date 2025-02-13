@@ -1,18 +1,24 @@
 package com.shyampatel.webapp.githubplayroom.user;
 
-import lombok.RequiredArgsConstructor;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
 
-@RequiredArgsConstructor
 @Service
 public class UserService {
 
     private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
+
+    @Autowired
+    public UserService(UserRepository repository, PasswordEncoder passwordEncoder) {
+        this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public User save(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -39,4 +45,8 @@ public class UserService {
         repository.save(user);
     }
 
+    @Transactional
+    public void deleteUserByUsername(User user) {
+        repository.removeByEmail(user.getEmail());
+    }
 }

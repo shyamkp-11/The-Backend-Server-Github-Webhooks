@@ -7,11 +7,11 @@ import org.springframework.stereotype.Service;
 public class GithubUserMapper {
     public GithubUser togithubUser(GithubUserDto githubUserDto) {
         return GithubUser.builder()
-                .globalId(githubUserDto.globalId())
-                .firstName(githubUserDto.firstName())
-                .lastName(githubUserDto.lastName())
-                .email(githubUserDto.email())
-                .username(githubUserDto.username())
+                .setGlobalId(githubUserDto.globalId())
+                .setFirstName(githubUserDto.firstName())
+                .setLastName(githubUserDto.lastName())
+                .setEmail(githubUserDto.email())
+                .setUsername(githubUserDto.username())
                 .build();
     }
 

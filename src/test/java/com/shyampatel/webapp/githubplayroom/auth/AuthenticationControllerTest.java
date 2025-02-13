@@ -1,56 +1,65 @@
 package com.shyampatel.webapp.githubplayroom.auth;
 
-import com.shyampatel.webapp.githubplayroom.config.JwtService;
-import com.shyampatel.webapp.githubplayroom.token.TokenRepository;
+import com.shyampatel.webapp.githubplayroom.user.Role;
+import com.shyampatel.webapp.githubplayroom.user.User;
+import com.shyampatel.webapp.githubplayroom.user.UserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-
-//@SpringBootTest()
-@WebMvcTest(controllers = AuthenticationController.class)
+@SpringBootTest()
+//@WebMvcTest(controllers = AuthenticationController.class)
+@ContextConfiguration
 //@AutoConfigureMockMvc
 class AuthenticationControllerTest {
 
     @Autowired
+    private WebApplicationContext context;
+    @Autowired
     private AuthenticationController authenticationController;
-
-    @MockitoBean
+    @Autowired
     private AuthenticationService authenticationService;
-    @MockitoBean
-    private JwtService jwtService;
-    @MockitoBean
-    private TokenRepository tokenRepository;
 
-
-    @Autowired
     private MockMvc mockMvc;
+
+    private String token;
+
+    private static boolean onceSetup = false;
+
     @Autowired
-    private WebApplicationContext webApplicationContext;
+    private UserService userService;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws Exception {
         //Init MockMvc Object and build
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+       mockMvc = MockMvcBuilders
+				.webAppContextSetup(context)
+				.apply(springSecurity())
+				.build();
+//       if (!onceSetup) {
+           var result = authenticationService.register(
+                   RegisterRequest.builder().setEmail("admin").setPassword("password").setRole(Role.ADMIN).build()
+           );
+           token = result.getAccessToken();
+//           onceSetup = true;
+//       }
     }
     @AfterEach
     void tearDown() {
+        userService.deleteUserByUsername(User.builder().setEmail("admin").build());
     }
 
     @Test
@@ -60,21 +69,37 @@ class AuthenticationControllerTest {
 
     @Test
     void register() throws Exception {
-        Mockito.when(authenticationService.register(Mockito.any())).thenReturn(AuthenticationResponse.builder().build());
-        assertThat(authenticationService.register(RegisterRequest.builder().build())).isEqualTo(AuthenticationResponse.builder().build());
-        String requestBody = "{\"email\": \"\", \"password\": \"password\"}";
+        System.out.println("token: " + token);
+        String body = """
+                {
+                  "role":"USER",
+                  "password": "password",
+                  "email": "shyam@mailing.com"
+                }
+                """;
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBody))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + token)
+                        .content(body))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
 
     @Test
-    void authenticate() {
+    void authenticate() throws Exception {
+//        Todo fix this
+        Thread.sleep(1000);
+        String authenticateBody = """
+                {
+                    "email": "admin",
+                    "password": "password"
+                }
+                """ ;
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/authenticate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(authenticateBody))
+                .andDo(print())
+                .andExpect(status().isOk()).andReturn();
     }
 
-    @Test
-    void refreshToken() {
-    }
 }

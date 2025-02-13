@@ -10,7 +10,8 @@ import com.shyampatel.webapp.githubplayroom.user.User;
 import com.shyampatel.webapp.githubplayroom.user.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,7 +21,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 
 @Service
-@RequiredArgsConstructor
 public class AuthenticationService {
   private final UserRepository repository;
   private final TokenRepository tokenRepository;
@@ -28,22 +28,28 @@ public class AuthenticationService {
   private final JwtService jwtService;
   private final AuthenticationManager authenticationManager;
 
+  @Autowired
+  public AuthenticationService(UserRepository repository, TokenRepository tokenRepository, PasswordEncoder passwordEncoder, JwtService jwtService, AuthenticationManager authenticationManager) {
+    this.repository = repository;
+    this.tokenRepository = tokenRepository;
+    this.passwordEncoder = passwordEncoder;
+    this.jwtService = jwtService;
+    this.authenticationManager = authenticationManager;
+  }
+
   public AuthenticationResponse register(RegisterRequest request) {
     var user = User.builder()
-        .firstname(request.getFirstname())
-        .lastname(request.getLastname())
-        .email(request.getEmail())
-        .password(passwordEncoder.encode(request.getPassword()))
-        .role(request.getRole())
-        .build();
+            .setFirstname(request.getFirstname())
+            .setLastname(request.getLastname())
+            .setEmail(request.getEmail())
+            .setPassword(passwordEncoder.encode(request.getPassword()))
+            .setRole(request.getRole())
+            .build();
     var savedUser = repository.save(user);
     var jwtToken = jwtService.generateToken(user);
     var refreshToken = jwtService.generateRefreshToken(user);
     saveUserToken(savedUser, jwtToken);
-    return AuthenticationResponse.builder()
-        .accessToken(jwtToken)
-            .refreshToken(refreshToken)
-        .build();
+    return new AuthenticationResponse(jwtToken, refreshToken);
   }
 
   public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -59,21 +65,18 @@ public class AuthenticationService {
     var refreshToken = jwtService.generateRefreshToken(user);
     revokeAllUserTokens(user);
     saveUserToken(user, jwtToken);
-    return AuthenticationResponse.builder()
-        .accessToken(jwtToken)
-            .refreshToken(refreshToken)
-        .build();
+    return new AuthenticationResponse(jwtToken, refreshToken);
   }
 
   private void saveUserToken(User user, String jwtToken) {
     var token = Token.builder()
-        .user(user)
-        .token(jwtToken)
-        .tokenType(TokenType.BEARER)
-        .expired(false)
-        .revoked(false)
+        .setUser(user)
+        .setToken(jwtToken)
+        .setTokenType(TokenType.BEARER)
+        .setExpired(false)
+        .setRevoked(false)
         .build();
-    tokenRepository.save(token);
+    tokenRepository.saveAndFlush(token);
   }
 
   private void revokeAllUserTokens(User user) {
@@ -106,10 +109,7 @@ public class AuthenticationService {
         var accessToken = jwtService.generateToken(user);
         revokeAllUserTokens(user);
         saveUserToken(user, accessToken);
-        var authResponse = AuthenticationResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
+        var authResponse = new AuthenticationResponse(accessToken, refreshToken);
         new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
       }
     }
@@ -117,19 +117,16 @@ public class AuthenticationService {
 
   public AuthenticationResponse createClientApiUser(RegisterRequest request) {
     var user = User.builder()
-            .firstname(request.getFirstname())
-            .lastname(request.getLastname())
-            .email(request.getEmail())
-            .password(passwordEncoder.encode(request.getPassword()))
-            .role(Role.USER)
+            .setFirstname(request.getFirstname())
+            .setLastname(request.getLastname())
+            .setEmail(request.getEmail())
+            .setPassword(passwordEncoder.encode(request.getPassword()))
+            .setRole(Role.USER)
             .build();
     var savedUser = repository.save(user);
     var jwtToken = jwtService.generateTokenMaxLifetime(user);
     var refreshToken = jwtService.generateTokenMaxLifetime(user);
     saveUserToken(savedUser, jwtToken);
-    return AuthenticationResponse.builder()
-            .accessToken(jwtToken)
-            .refreshToken(refreshToken)
-            .build();
+    return new AuthenticationResponse(jwtToken, refreshToken);
   }
 }

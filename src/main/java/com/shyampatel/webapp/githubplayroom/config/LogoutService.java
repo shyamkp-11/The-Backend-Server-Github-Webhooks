@@ -4,18 +4,23 @@ import com.shyampatel.webapp.githubplayroom.token.TokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class LogoutService implements LogoutHandler {
 
   private final TokenRepository tokenRepository;
 
-  @Override
+  @Autowired
+  public LogoutService(TokenRepository tokenRepository) {
+    this.tokenRepository = tokenRepository;
+  }
+
+    @Override
   public void logout(
       HttpServletRequest request,
       HttpServletResponse response,

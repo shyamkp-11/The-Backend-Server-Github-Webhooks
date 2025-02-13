@@ -39,12 +39,12 @@ class GithubUserRepositoryTest {
     @Test
     void testJpaAuditingFields() {
         var user = GithubUser.builder()
-                .globalId("globalId")
-                .username("username")
-                .email("email")
-                .firstName("firstName")
-                .lastName("lastName")
-                .githubUserFcmS(null)
+                .setGlobalId("globalId")
+                .setUsername("username")
+                .setEmail("email")
+                .setFirstName("firstName")
+                .setLastName("lastName")
+                .setGithubUserFcmS(null)
                 .build();
         user.setCreatedBy(1);
         githubUserRepository.save(user);
@@ -56,23 +56,23 @@ class GithubUserRepositoryTest {
     @Test
     void testGetGithubUserFcmDefaultFailureCount() {
         var user = GithubUser.builder()
-                .globalId("globalId")
-                .username("username")
-                .email("email")
-                .firstName("firstName")
-                .lastName("lastName")
-                .githubUserFcmS(null)
+                .setGlobalId("globalId")
+                .setUsername("username")
+                .setEmail("email")
+                .setFirstName("firstName")
+                .setLastName("lastName")
+                .setGithubUserFcmS(null)
                 .build();
         user.setCreatedBy(1);
         githubUserRepository.save(user);
         var fcm = githubUserFcmRepository.save(
                 GithubUserFcm.builder()
-                        .createdBy(1)
-                        .deviceId("deviceId")
-                        .githubUser(GithubUser.builder().globalId("globalId").build())
-                        .fcmToken("fcmToken")
-                        .enabled(false)
-                        .signedOut(false)
+                        .setCreatedBy(1)
+                        .setDeviceId("deviceId")
+                        .setGithubUser(GithubUser.builder().setGlobalId("globalId").build())
+                        .setFcmToken("fcmToken")
+                        .setEnabled(false)
+                        .setSignedOut(false)
                         .build()
         );
         assert fcm.getMessageDeliverFailureCount() == 0;
