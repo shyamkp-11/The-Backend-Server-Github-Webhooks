@@ -40,6 +40,7 @@ public class GithubPlayroomSecurityConfig {
     public GithubPlayroomSecurityConfig( JwtAuthenticationFilter jwtAuthFilter, AuthenticationProvider authenticationProvider, LogoutHandler logoutHandler) {
         this.WHITE_LIST_URL = new String[]{
                 "/api/v1/auth/authenticate",
+                "/api/v1/auth/refresh-token",
                 "/api/v1/githubUsers/githubWebhookDelivery",
                 "/configuration/ui",
                 "/configuration/security",

@@ -89,7 +89,7 @@ public class AuthenticationService {
     });
     tokenRepository.saveAll(validUserTokens);
   }
-
+// TODO change, not a secure implementation currently
   public void refreshToken(
           HttpServletRequest request,
           HttpServletResponse response

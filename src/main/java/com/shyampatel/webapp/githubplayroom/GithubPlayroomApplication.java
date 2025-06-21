@@ -38,7 +38,7 @@ public class GithubPlayroomApplication {
         }
 	}
 
-	@Profile("dev")
+//	@Profile("dev")
 	@Bean
 	public CommandLineRunner commandLineRunner(
 			AuthenticationService service,

@@ -21,8 +21,6 @@ pipeline {
                     env.AWS_ACCESS_KEY_ENV = props.AWS_ACCESS_KEY_ENV
                     env.AWS_DEFAULT_REGION_ENV = props.AWS_DEFAULT_REGION_ENV
                     env.S3_WAR_PATH = props.S3_WAR_PATH
-                    env.HTTPS_CERTIFICATE = props.HTTPS_CERTIFICATE
-                    env.HTTPS_SERVER_PRIVATE_KEY = props.HTTPS_SERVER_PRIVATE_KEY
                     env.DEPLOY_LOCALLY = false
                 }
             }
