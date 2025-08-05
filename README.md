@@ -49,3 +49,26 @@ It uses JWT based token authentication to restrict access to secured API endpoin
         "email": "<email>"
     }'
    ```
+4. POST called when a user signs in to the client app 
+   ```curl
+   curl --location 'http://localhost:8090/api/v1/githubUsers/signedInToApp' \
+   --header 'Authorization: Bearer <client_api_token>' \
+   --header 'Content-Type: application/json' \
+   --data ' {
+       "fcmToken":"<client app firebase messaging token>",
+       "deviceId":"<client app deivce id>",
+       "globalId":"<github user global id>",
+       "username":"<github username>",
+       "firstName":"<user first name>",
+       "lastName":"<user last name>"
+   }'
+   ```
+5. POST called when user enables / disables push notifications for repository stars.
+   ```curl
+   {
+    "fcmToken": "<client app firebase messaging token>",
+    "deviceId":"<client app deivce id>",
+    "globalId":"<github user global id>",
+    "fcmEnabled": <boolean: notifications enabled on client app>
+   }
+   ```
