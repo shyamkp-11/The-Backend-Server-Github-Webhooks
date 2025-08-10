@@ -22,6 +22,7 @@ pipeline {
                     env.AWS_DEFAULT_REGION_ENV = props.AWS_DEFAULT_REGION_ENV
                     env.S3_WAR_PATH = props.S3_WAR_PATH
                     env.DEPLOY_LOCALLY = false
+                    env.GITHUB_TOKEN = props.GITHUB_PAT
                 }
             }
         }
@@ -40,6 +41,7 @@ mkdir -p .m2
         }
         stage('Test') {
             when {
+                beforeAgent true;
                 expression {
                     return false
                 }
@@ -62,10 +64,10 @@ mkdir -p .m2
                 }
             }
             agent {
-                docker {
-                    image 'maven:3.9.9-amazoncorretto-21'
-                    reuseNode true
-                }
+                dockerfile {
+                    dir 'docker'
+					reuseNode true
+				}
             }
             steps {
                 withCredentials([file(credentialsId: 'GITHUB_PLAYROOM_FIREBASE_SDK_JSON', variable: 'firebaseSdkJson')]) {
@@ -74,13 +76,55 @@ cp -f \$firebaseSdkJson src/main/resources/github-playroom-firebase-adminsdk.jso
                     '''
                 }
                 sh '''
-mvn -Dmaven.repo.local=.m2/repository clean install --batch-mode
+mvn -Dmaven.repo.local=.m2/repository clean install --batch-mode -DskipTests
                 '''
 //                 withCredentials([
 //                       file(credentialsId: 'maven-settings', variable: 'MAVEN_SETTINGS')
 //                     ]) {
 //                       sh 'mvn -s $MAVEN_SETTINGS -B -DskipTests clean package'
 //                     }
+            }
+        }
+        stage('Upload Github release') {
+            agent {
+                dockerfile {
+                    dir 'docker'
+					//args '-e GITHUB_TOKEN=${env.GITHUB_TOKEN}'
+					reuseNode true
+				}
+			}
+			when {
+                beforeAgent true;
+				expression {
+                    def scriptOutput = sh(returnStdout: true, script: '''
+                    #!/bin/bash
+                    commit1=$(git rev-list -1 $(git describe --tags --abbrev=0));
+                    commit2=$(git rev-parse HEAD);
+                    if [ "$commit1" = "$commit2" ]; then
+                        echo "true"
+                    else
+                        echo "false"
+                    fi''').trim()
+                    echo "$scriptOutput"
+                    return scriptOutput == "true"
+                }
+            }
+            steps {
+                script {
+                    def tagName = sh(returnStdout: true, script:'git describe --tags --abbrev=0').trim()
+                    def commitish = sh(returnStdout: true, script:'git rev-parse HEAD').trim()
+                    //def fileName = sh(returnStdout: true, script:'$(find target -type f -name "*jar")').trim()
+                    sh """
+# Check if the release already exists
+if gh release view "${tagName}" &>/dev/null; then
+    echo "Release ${tagName} already exists. Skipping creation."
+else
+    # Create the release if it does not exist
+    echo "Creating release ${tagName}..."
+    gh release create ${tagName} target/githubplayroom.jar
+fi
+"""
+                }
             }
         }
         stage ('Build dockerImage') {
