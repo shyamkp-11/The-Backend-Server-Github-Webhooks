@@ -7,6 +7,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.core.io.ClassPathResource;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -18,12 +20,19 @@ public class GithubPlayroomApplication {
 		SpringApplication.run(GithubPlayroomApplication.class, args);
 
 		try {
-		InputStream serviceAccount =
-				new ClassPathResource(
-						"github-playroom-firebase-adminsdk.json").getInputStream();
-            FirebaseOptions options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                    .build();
+			String firebaseJsonPath = System.getenv("firebaseJsonPath");
+			InputStream serviceAccount;
+			if (firebaseJsonPath == null) {
+				serviceAccount =
+						new ClassPathResource(
+								"github-playroom-firebase-adminsdk.json").getInputStream();
+
+			} else {
+				serviceAccount = new FileInputStream(firebaseJsonPath);
+			}
+			FirebaseOptions options = FirebaseOptions.builder()
+					.setCredentials(GoogleCredentials.fromStream(serviceAccount))
+					.build();
 			FirebaseApp.initializeApp(options);
         } catch (IOException e) {
             throw new RuntimeException(e);
